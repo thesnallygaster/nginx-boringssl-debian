@@ -1,0 +1,38 @@
+From: Jan Mojzis <jan.mojzis@gmail.com>
+Date: Fri, 13 Jan 2023 12:59:07 +0100
+Subject: Fix 'Vary' header
+
+The patch fixes problem described here:
+https://github.com/google/ngx_brotli/issues/97
+
+"brotli_static on;" causes "Vary: Accept-Encoding" to be added to every
+file (including images, ...)
+The patch fixes the problem and adds "Vary: Accept-Encoding" only to
+responses when brotli static compression is used.
+---
+ static/ngx_http_brotli_static_module.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/static/ngx_http_brotli_static_module.c b/static/ngx_http_brotli_static_module.c
+index 8f96177..44f0cb0 100644
+--- a/static/ngx_http_brotli_static_module.c
++++ b/static/ngx_http_brotli_static_module.c
+@@ -168,7 +168,6 @@ static ngx_int_t handler(ngx_http_request_t* req) {
+     /* Ignore request properties (e.g. Accept-Encoding). */
+   } else {
+     /* NGX_HTTP_BROTLI_STATIC_ON */
+-    req->gzip_vary = 1;
+     rc = check_eligility(req);
+     if (rc != NGX_OK) return NGX_DECLINED;
+   }
+@@ -227,6 +226,10 @@ static ngx_int_t handler(ngx_http_request_t* req) {
+     return NGX_DECLINED;
+   }
+ 
++  if (cfg->enable == NGX_HTTP_BROTLI_STATIC_ON) {
++	 req->gzip_vary = 1;
++  }
++
+   /* So far so good. */
+   ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "http static fd: %d",
+                  file_info.fd);
