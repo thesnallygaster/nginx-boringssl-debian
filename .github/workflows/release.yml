@@ -8,10 +8,15 @@ on:
 jobs:
   build:
     name: Build .deb package
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        arch: [amd64]
+        platform: [amd64, arm64]
+        include:
+          - platform: amd64
+            runner: ubuntu-24.04
+          - platform: arm64
+            runner: ubuntu-24.04-arm
 
     steps:
       - name: Checkout repository
@@ -20,14 +25,9 @@ jobs:
       - name: Extract Version from Tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Set up QEMU for cross-compilation
-        if: matrix.arch == 'arm64'
-        uses: docker/setup-qemu-action@v3
-
       - name: Create Debian Bookworm container
         run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --name build-container -d -v $PWD/compile.sh:/compile.sh -v $PWD/patches:/patches -v $PWD/distrib:/distrib -w / --platform=linux/${{ matrix.arch }} debian:bookworm-slim sleep infinity
+          docker run --name build-container --platform linux/${{ matrix.platform }} -d -v $PWD/compile.sh:/compile.sh -v $PWD/patches:/patches -v $PWD/distrib:/distrib -w / debian:bookworm-slim sleep infinity
 
       - name: Run build script
         run: |
@@ -35,13 +35,13 @@ jobs:
 
       - name: Retrieve built .deb package
         run: |
-          PACKAGE_NAME="nginx_${{ env.VERSION }}_${{ matrix.arch }}.deb"
+          PACKAGE_NAME="nginx_${{ env.VERSION }}_${{ matrix.platform }}.deb"
           docker cp build-container:/build/$PACKAGE_NAME ./
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: debian-package-${{ matrix.arch }}
+          name: debian-package-${{ matrix.platform }}
           path: ./*.deb
 
   release:
