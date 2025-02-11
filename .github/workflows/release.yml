@@ -1,0 +1,58 @@
+name: Build and Release Debian Package
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Build .deb package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU for cross-compilation
+        if: matrix.arch == 'arm64'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Create Debian Bookworm container
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker run --name build-container -d -v $PWD/compile.sh:/compile.sh -v $PWD/patches:/patches -v $PWD/distrib:/distrib -w / --platform=linux/${{ matrix.arch }} debian:bookworm-slim sleep infinity
+
+      - name: Run build script
+        run: |
+          docker exec build-container bash -c "/compile.sh"
+
+      - name: Retrieve built .deb package
+        run: |
+          docker cp build-container:/build/*.deb ./
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-package-${{ matrix.arch }}
+          path: ./*.deb
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*.deb
+          tag_name: ${{ github.ref_name }}
+          fail_on_unmatched_files: true
