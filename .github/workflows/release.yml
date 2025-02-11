@@ -60,3 +60,5 @@ jobs:
           files: artifacts/**/*.deb
           tag_name: ${{ github.ref_name }}
           fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
