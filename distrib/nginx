@@ -1,0 +1,7 @@
+#!/bin/bash
+
+NGINX_WRAPPER="`readlink -f "$0"`"
+HERE="`dirname "$NGINX_WRAPPER"`"
+export LD_LIBRARY_PATH=/opt/boringssl/lib
+
+exec -a "$0" "$HERE/nginx-bin" "$@"

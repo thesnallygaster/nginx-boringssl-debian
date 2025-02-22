@@ -56,6 +56,8 @@ patch -Np1 -i /patches/fix-boringssl-release-build.patch
 cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 -DCMAKE_INSTALL_PREFIX=/opt/boringssl
 ninja -C build
 DESTDIR=/build/destdir ninja -C build install
+mv /build/destdir/opt/boringssl/bin/bssl /build/destdir/opt/boringssl/bin/bssl-bin
+cp /distrib/bssl /build/destdir/opt/boringssl/bin/bssl
 ln -s /build/destdir/opt/boringssl /opt/boringssl
 
 cd /build
@@ -108,9 +110,9 @@ cd /build/destdir/etc/nginx
 ln -s ../../usr/share/nginx/modules-available .
 cd /build/destdir/usr/share/nginx
 ln -s ../../lib/nginx/modules .
-cd /build
-cd nginx-"${NGINX_VERSION}"
 cp -r /build/destdir/usr/share/nginx/html/index.html /build/destdir/var/www/html/index.nginx-debian.html
+mv /build/destdir/usr/sbin/nginx /build/destdir/usr/sbin/nginx-bin
+cp /distrib/nginx /build/destdir/usr/sbin/nginx
 
 tree /build/destdir
 
