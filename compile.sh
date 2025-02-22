@@ -5,7 +5,7 @@
 BORINGSSL_VERSION="0.20250212.0"
 NGINX_VERSION="1.26.3"
 FANCYINDEX_VERSION="0.5.2"
-DEB_REVISION="4"
+DEB_REVISION="5"
 ARCHITECTURE="$(dpkg --print-architecture)"
 
 cat << EOF > /etc/apt/sources.list.d/debian.sources
