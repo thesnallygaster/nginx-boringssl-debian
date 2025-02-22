@@ -44,8 +44,7 @@ apt install -y --no-install-recommends \
 	libperl-dev \
 	libbrotli-dev \
 	zstd \
-	tree \
-	openssh-client
+	tree
 
 mkdir -p /build
 mkdir -p destdir
