@@ -54,7 +54,7 @@ cd /build
 git clone -b "${BORINGSSL_VERSION}" --single-branch https://github.com/google/boringssl
 cd boringssl
 patch -Np1 -i /patches/fix-boringssl-release-build.patch
-cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/boringssl
+cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 -DCMAKE_INSTALL_PREFIX=/opt/boringssl
 ninja -C build
 DESTDIR=/build/destdir ninja -C build install
 ln -s /build/destdir/opt/boringssl /opt/boringssl
