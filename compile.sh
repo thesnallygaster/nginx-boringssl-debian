@@ -2,10 +2,10 @@
 
 # shellcheck disable=SC2164
 
-BORINGSSL_VERSION="0.20250311.0"
-NGINX_VERSION="1.26.3"
+BORINGSSL_VERSION="0.20250514.0"
+NGINX_VERSION="1.28.0"
 FANCYINDEX_VERSION="0.5.2"
-DEB_REVISION="6"
+DEB_REVISION="1"
 ARCHITECTURE="$(dpkg --print-architecture)"
 
 cat << EOF > /etc/apt/sources.list.d/debian.sources
